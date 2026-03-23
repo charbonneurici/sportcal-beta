@@ -1,57 +1,64 @@
+// api/cal.js
 export default async function handler(req, res) {
     const { teams } = req.query;
-    if (!teams) return res.status(400).send("No teams selected");
+    if (!teams) return res.status(400).send("Aucun club sélectionné");
+
+    // Décodage des IDs de clubs
     const decodedTeams = Buffer.from(teams, 'base64').toString().split(',');
     
-    const teamMapping = {
-        "stade-toulousain": "135311", "stade-rochelais": "135317", "ubb-bordeaux": "135315",
-        "rct-toulon": "135314", "racing-92": "135310", "stade-francais": "135312",
-        "asm-clermont": "135313", "lyon-lou": "135316", "castres-olympique": "135319",
-        "pau-section": "135320", "bayonne": "135322", "perpignan": "135324",
-        "montpellier": "135318", "montauban": "135338"
-    };
+    // BASE DE DONNÉES EN DUR (Zéro API, Zéro erreur de Cardiff)
+    // J'ai mis des matchs tests pour les 14 clubs pour la Beta
+    const matchDatabase = [
+        { team: "stade-toulousain", summary: "Stade Toulousain vs La Rochelle", date: "2026-03-28T21:00:00Z" },
+        { team: "stade-rochelais", summary: "La Rochelle vs Stade Toulousain", date: "2026-03-28T21:00:00Z" },
+        { team: "ubb-bordeaux", summary: "Bordeaux-Bègles vs Toulon", date: "2026-03-29T15:00:00Z" },
+        { team: "rct-toulon", summary: "Toulon vs Bordeaux-Bègles", date: "2026-03-29T15:00:00Z" },
+        { team: "racing-92", summary: "Racing 92 vs Stade Français", date: "2026-03-28T17:00:00Z" },
+        { team: "stade-francais", summary: "Stade Français vs Racing 92", date: "2026-03-28T17:00:00Z" },
+        { team: "asm-clermont", summary: "Clermont vs Lyon", date: "2026-03-29T17:00:00Z" },
+        { team: "lyon-lou", summary: "Lyon vs Clermont", date: "2026-03-29T17:00:00Z" },
+        { team: "castres-olympique", summary: "Castres vs Pau", date: "2026-03-28T15:00:00Z" },
+        { team: "pau-section", summary: "Pau vs Castres", date: "2026-03-28T15:00:00Z" },
+        { team: "bayonne", name: "Bayonne vs Perpignan", date: "2026-03-28T15:00:00Z" },
+        { team: "perpignan", name: "Perpignan vs Bayonne", date: "2026-03-28T15:00:00Z" },
+        { team: "montpellier", name: "Montpellier vs Montauban", date: "2026-03-29T15:00:00Z" },
+        { team: "montauban", name: "US Montauban vs Montpellier", date: "2026-03-29T15:00:00Z" }
+    ];
 
-    let allEvents = [];
+    // Filtrage des matchs selon la sélection de l'utilisateur
+    const filteredMatches = matchDatabase.filter(m => decodedTeams.includes(m.team));
 
-    // 1. TENTATIVE API LIVE
-    for (const teamKey of decodedTeams) {
-        const id = teamMapping[teamKey];
-        if (id) {
-            try {
-                const response = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=${id}`);
-                const data = await response.json();
-                if (data.events) allEvents = [...allEvents, ...data.events];
-            } catch (e) { console.error("API DOWN"); }
-        }
-    }
+    // Génération du contenu iCalendar
+    let ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//SportCal//Rugby//FR',
+        'X-WR-CALNAME:Top 14 Stable',
+        'METHOD:PUBLISH',
+        'CALSCALE:GREGORIAN'
+    ];
 
-    // 2. MODE SECOURS (Si l'API ne renvoie rien, on met des matchs de test pour demain)
-    if (allEvents.length === 0) {
-        allEvents.push({
-            strEvent: "Test : Toulouse vs La Rochelle (Match fictif)",
-            strTimestamp: new Date(Date.now() + 86400000).toISOString(), // Demain
-            strLeague: "Top 14 - Mode Secours",
-            idEvent: "99999"
-        });
-    }
+    filteredMatches.forEach(event => {
+        // Calcul des dates (début et +2h)
+        const startDate = new Date(event.date);
+        const endDate = new Date(startDate.getTime() + (2 * 60 * 60 * 1000)); // + 2 heures
 
-    // 3. GÉNÉRATION ICS
-    let ics = ['BEGIN:VCALENDAR','VERSION:2.0','X-WR-CALNAME:Top 14 Live','METHOD:PUBLISH'];
-
-    allEvents.forEach(event => {
-        const startDate = new Date(event.strTimestamp || Date.now());
-        const endDate = new Date(startDate.getTime() + (2 * 60 * 60 * 1000));
-        const formatDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        // Formatage pour iCal (AAAAMMDDTHHMMSSZ)
+        const formatDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
         ics.push('BEGIN:VEVENT');
-        ics.push(`SUMMARY:🏉 ${event.strEvent}`);
+        ics.push(`SUMMARY:🏉 ${event.summary}`);
         ics.push(`DTSTART:${formatDate(startDate)}`);
-        ics.push(`DTEND:${formatDate(endDate)}`);
-        ics.push(`UID:${event.idEvent}@sportcal.com`);
+        ics.push(`DTEND:${formatDate(endDate)}`); // Le créneau de 2h
+        ics.push(`DESCRIPTION:Top 14 - Mode Stable`);
+        ics.push(`UID:${event.team}-${formatDate(startDate)}@sportcal.com`);
         ics.push('END:VEVENT');
     });
 
     ics.push('END:VCALENDAR');
+
+    // Réponse
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+    res.setHeader('Cache-Control', 's-maxage=3600'); // Cache Vercel 1h
     res.status(200).send(ics.join('\r\n'));
 }
