@@ -2,58 +2,52 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SportCal Beta 🏆</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportCal Live 🏆</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-6 text-center font-sans">
+<body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-6 text-center">
     
-    <h1 class="text-5xl font-black mb-4 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">SportCal</h1>
-    <p class="text-slate-400 mb-10">Zéro serveur, zéro bug. Juste tes matchs.</p>
+    <div class="max-w-md w-full">
+        <h1 class="text-5xl font-black mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">SportCal Live</h1>
+        <p class="text-slate-400 mb-10 text-lg font-medium">Tes matchs, en temps réel.</p>
 
-    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 w-full max-w-md shadow-2xl">
-        <h2 class="text-xl font-bold mb-6 text-left">Choisis tes équipes :</h2>
-        
-        <div class="space-y-4 mb-8 text-left">
-            <label class="flex items-center p-4 bg-slate-700/50 rounded-2xl cursor-pointer hover:bg-slate-600 transition">
-                <input type="checkbox" id="psg" class="w-6 h-6 mr-4 accent-emerald-400">
-                <div><p class="font-bold">PSG</p><p class="text-xs text-slate-400">Football</p></div>
-            </label>
+        <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
+            <h2 class="text-xl font-bold mb-6 text-left">Choisis tes favoris :</h2>
             
-            <label class="flex items-center p-4 bg-slate-700/50 rounded-2xl cursor-pointer hover:bg-slate-600 transition">
-                <input type="checkbox" id="xv" class="w-6 h-6 mr-4 accent-blue-400">
-                <div><p class="font-bold">XV de France</p><p class="text-xs text-slate-400">Rugby</p></div>
-            </label>
+            <div class="space-y-4 mb-8 text-left">
+                <label class="flex items-center p-4 bg-slate-700/50 rounded-2xl cursor-pointer hover:bg-slate-700 transition">
+                    <input type="checkbox" value="psg" class="w-6 h-6 rounded-full accent-emerald-400 mr-4">
+                    <div><p class="font-bold">PSG</p><p class="text-xs text-slate-400">Football • Ligue 1</p></div>
+                </label>
+                
+                <label class="flex items-center p-4 bg-slate-700/50 rounded-2xl cursor-pointer hover:bg-slate-700 transition">
+                    <input type="checkbox" value="stade-toulousain" class="w-6 h-6 rounded-full accent-blue-400 mr-4">
+                    <div><p class="font-bold">Stade Toulousain</p><p class="text-xs text-slate-400">Rugby • Top 14</p></div>
+                </label>
+            </div>
+
+            <button onclick="generate()" class="w-full bg-white text-slate-900 py-4 rounded-2xl font-black text-lg hover:scale-105 transition shadow-lg shadow-white/10">
+                Générer mon flux iCal
+            </button>
         </div>
 
-        <button onclick="genererCalendrier()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-4 rounded-2xl font-black text-lg transition shadow-lg">
-            Générer mon fichier .ics
-        </button>
-    </div>
-
-    <div id="info" class="mt-8 text-slate-500 text-sm max-w-sm">
-        Une fois le fichier téléchargé, ouvre-le simplement pour l'ajouter à ton calendrier habituel.
+        <div id="result" class="hidden mt-8 p-6 bg-slate-950 rounded-3xl border border-emerald-500/30">
+            <p class="text-xs text-emerald-400 mb-3 uppercase tracking-widest font-black">Lien synchronisé prêt !</p>
+            <code id="url" class="text-blue-300 break-all text-sm block mb-4 p-2 bg-slate-900 rounded border border-slate-800"></code>
+            <p class="text-xs text-slate-500 italic">Copie ce lien dans ton Google Calendar / Apple Cal.</p>
+        </div>
     </div>
 
     <script>
-        function genererCalendrier() {
-            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//SportCal//FR\n";
+        function generate() {
+            const checks = document.querySelectorAll('input:checked');
+            const ids = Array.from(checks).map(c => c.value).join(',');
+            if(!ids) return alert("Choisis au moins une équipe !");
             
-            if(document.getElementById('psg').checked) {
-                icsContent += "BEGIN:VEVENT\nSUMMARY:⚽️ PSG vs Monaco\nDTSTART:20260328T210000Z\nDTEND:20260328T224500Z\nEND:VEVENT\n";
-            }
-            if(document.getElementById('xv').checked) {
-                icsContent += "BEGIN:VEVENT\nSUMMARY:🏉 France vs Pays de Galles\nDTSTART:20260321T154500Z\nDTEND:20260321T173000Z\nEND:VEVENT\n";
-            }
-            
-            icsContent += "END:VCALENDAR";
-
-            // Création d'un lien invisible pour télécharger le fichier direct
-            const blob = new Blob([icsContent], { type: 'text/calendar' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'mon_calendrier_sport.ics';
-            a.click();
+            const link = window.location.origin + '/api/cal?teams=' + btoa(ids);
+            document.getElementById('url').innerText = link;
+            document.getElementById('result').classList.remove('hidden');
         }
     </script>
 </body>
