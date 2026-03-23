@@ -1,18 +1,28 @@
 export default async function handler(req, res) {
     const { teams } = req.query;
-    if (!teams) return res.status(400).send("Aucune équipe sélectionnée");
+    if (!teams) return res.status(400).send("Aucun club sélectionné");
 
     const decodedTeams = Buffer.from(teams, 'base64').toString().split(',');
     
-    // Mapping des IDs TheSportsDB (PSG et Toulouse pour le test)
     const teamMapping = {
-        'psg': '133739',
-        'stade-toulousain': '135311'
+        "stade-toulousain": "135311",
+        "stade-rochelais": "135317",
+        "ubb-bordeaux": "135315",
+        "rct-toulon": "135314",
+        "racing-92": "135310",
+        "stade-francais": "135312",
+        "asm-clermont": "135313",
+        "lyon-lou": "135316",
+        "castres-olympique": "135319",
+        "pau-section": "135320",
+        "bayonne": "135322",
+        "perpignan": "135324",
+        "montpellier": "135318",
+        "montauban": "135338"
     };
 
     let allEvents = [];
 
-    // On boucle sur les équipes pour appeler l'API
     for (const teamKey of decodedTeams) {
         const id = teamMapping[teamKey];
         if (id) {
@@ -22,32 +32,28 @@ export default async function handler(req, res) {
                 if (data.events) {
                     allEvents = [...allEvents, ...data.events];
                 }
-            } catch (e) {
-                console.error("Erreur API:", e);
-            }
+            } catch (e) { console.error("API Error:", e); }
         }
     }
 
-    // Génération du contenu iCalendar
     let ics = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'X-WR-CALNAME:SportCal Live',
-        'REFRESH-INTERVAL;VALUE=DURATION:PT12H',
+        'PRODID:-//SportCal//Rugby//FR',
+        'X-WR-CALNAME:Top 14 Live',
         'METHOD:PUBLISH'
     ];
 
     allEvents.forEach(event => {
-        // Nettoyage de la date (YYYY-MM-DD + HH:mm:ss -> AAAAMMDDTHHMMSS)
         const dateRaw = event.strTimestamp || "";
         const dateClean = dateRaw.replace(/[-:]/g, '').split('+')[0];
 
         if (dateClean) {
             ics.push('BEGIN:VEVENT');
-            ics.push(`SUMMARY:${event.strEvent}`);
+            ics.push(`SUMMARY:🏉 ${event.strEvent}`);
             ics.push(`DTSTART:${dateClean}Z`);
-            ics.push(`DTEND:${dateClean}Z`); // On pourrait ajouter +2h ici
-            ics.push(`DESCRIPTION:${event.strLeague} - ${event.strVenue || ''}`);
+            ics.push(`DTEND:${dateClean}Z`);
+            ics.push(`DESCRIPTION:${event.strLeague}`);
             ics.push(`UID:${event.idEvent}@sportcal.com`);
             ics.push('END:VEVENT');
         }
@@ -56,6 +62,6 @@ export default async function handler(req, res) {
     ics.push('END:VCALENDAR');
 
     res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate'); // Cache Vercel de 1h
+    res.setHeader('Cache-Control', 's-maxage=3600');
     res.status(200).send(ics.join('\r\n'));
 }
