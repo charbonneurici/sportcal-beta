@@ -3,48 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportCal Live 🏆</title>
+    <title>SportCal Rugby 🏉</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .grid-clubs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1rem;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-6 text-center">
+<body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center p-6">
     
-    <div class="max-w-md w-full">
-        <h1 class="text-5xl font-black mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">SportCal Live</h1>
-        <p class="text-slate-400 mb-10 text-lg font-medium">Tes matchs, en temps réel.</p>
+    <div class="max-w-4xl w-full text-center">
+        <h1 class="text-6xl font-black mb-2 bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent italic tracking-tighter text-white">SportCal Rugby</h1>
+        <p class="text-slate-400 mb-10 text-xl font-medium uppercase tracking-[0.3em]">TOP 14 • LIVE</p>
 
-        <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
-            <h2 class="text-xl font-bold mb-6 text-left">Choisis tes favoris :</h2>
+        <div class="bg-slate-800 p-8 rounded-[2rem] shadow-2xl border border-slate-700">
+            <h2 class="text-xl font-bold mb-8 text-left text-slate-300 border-b border-slate-700 pb-4">Sélectionnez vos clubs :</h2>
             
-            <div class="space-y-4 mb-8 text-left">
-                <label class="flex items-center p-4 bg-slate-700/50 rounded-2xl cursor-pointer hover:bg-slate-700 transition">
-                    <input type="checkbox" value="psg" class="w-6 h-6 rounded-full accent-emerald-400 mr-4">
-                    <div><p class="font-bold">PSG</p><p class="text-xs text-slate-400">Football • Ligue 1</p></div>
-                </label>
-                
-                <label class="flex items-center p-4 bg-slate-700/50 rounded-2xl cursor-pointer hover:bg-slate-700 transition">
-                    <input type="checkbox" value="stade-toulousain" class="w-6 h-6 rounded-full accent-blue-400 mr-4">
-                    <div><p class="font-bold">Stade Toulousain</p><p class="text-xs text-slate-400">Rugby • Top 14</p></div>
-                </label>
-            </div>
+            <div id="clubs-list" class="grid-clubs mb-10">
+                </div>
 
-            <button onclick="generate()" class="w-full bg-white text-slate-900 py-4 rounded-2xl font-black text-lg hover:scale-105 transition shadow-lg shadow-white/10">
-                Générer mon flux iCal
+            <button onclick="generate()" class="w-full bg-green-600 hover:bg-green-500 text-white py-5 rounded-2xl font-black text-xl transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl">
+                GÉNÉRER MON CALENDRIER
             </button>
         </div>
 
-        <div id="result" class="hidden mt-8 p-6 bg-slate-950 rounded-3xl border border-emerald-500/30">
-            <p class="text-xs text-emerald-400 mb-3 uppercase tracking-widest font-black">Lien synchronisé prêt !</p>
-            <code id="url" class="text-blue-300 break-all text-sm block mb-4 p-2 bg-slate-900 rounded border border-slate-800"></code>
-            <p class="text-xs text-slate-500 italic">Copie ce lien dans ton Google Calendar / Apple Cal.</p>
+        <div id="result" class="hidden mt-8 p-6 bg-slate-950 rounded-[2rem] border border-green-500/30">
+            <p class="text-xs text-green-400 mb-3 uppercase tracking-widest font-black">Lien de synchronisation prêt :</p>
+            <code id="url" class="text-blue-300 break-all text-sm block p-4 bg-slate-900 rounded-xl border border-slate-800 mb-4 font-mono"></code>
         </div>
     </div>
 
     <script>
+        const clubs = [
+            { id: "stade-toulousain", name: "Toulouse", logo: "https://www.thesportsdb.com/images/media/team/badge/xqpvwt1521564172.png" },
+            { id: "stade-rochelais", name: "La Rochelle", logo: "https://www.thesportsdb.com/images/media/team/badge/u86m7u1521564756.png" },
+            { id: "ubb-bordeaux", name: "Bordeaux-Bègles", logo: "https://www.thesportsdb.com/images/media/team/badge/vpxrvr1521564537.png" },
+            { id: "rct-toulon", name: "Toulon", logo: "https://www.thesportsdb.com/images/media/team/badge/6t29771521564478.png" },
+            { id: "racing-92", name: "Racing 92", logo: "https://www.thesportsdb.com/images/media/team/badge/uwpvst1521564506.png" },
+            { id: "stade-francais", name: "Stade Français", logo: "https://www.thesportsdb.com/images/media/team/badge/8s9npt1551608931.png" },
+            { id: "asm-clermont", name: "Clermont", logo: "https://www.thesportsdb.com/images/media/team/badge/syvrtx1521564344.png" },
+            { id: "lyon-lou", name: "Lyon", logo: "https://www.thesportsdb.com/images/media/team/badge/rwstqt1521564379.png" },
+            { id: "castres-olympique", name: "Castres", logo: "https://www.thesportsdb.com/images/media/team/badge/9v64h41521564619.png" },
+            { id: "pau-section", name: "Pau", logo: "https://www.thesportsdb.com/images/media/team/badge/6998631521564593.png" },
+            { id: "bayonne", name: "Bayonne", logo: "https://www.thesportsdb.com/images/media/team/badge/9m29531521564887.png" },
+            { id: "perpignan", name: "Perpignan", logo: "https://www.thesportsdb.com/images/media/team/badge/6335191533470768.png" },
+            { id: "montpellier", name: "Montpellier", logo: "https://www.thesportsdb.com/images/media/team/badge/2529261551608670.png" },
+            { id: "montauban", name: "US Montauban", logo: "https://www.thesportsdb.com/images/media/team/badge/vsqxtv1521565551.png" }
+        ];
+
+        const listContainer = document.getElementById('clubs-list');
+        clubs.forEach(club => {
+            const label = document.createElement('label');
+            label.className = "flex flex-col items-center p-4 bg-slate-700/20 rounded-2xl cursor-pointer hover:bg-slate-700/50 transition-all border-2 border-transparent has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10";
+            label.innerHTML = `
+                <input type="checkbox" value="${club.id}" class="hidden">
+                <img src="${club.logo}" alt="${club.name}" class="w-16 h-16 object-contain mb-3">
+                <span class="text-[10px] font-black uppercase text-slate-300 text-center">${club.name}</span>
+            `;
+            listContainer.appendChild(label);
+        });
+
         function generate() {
             const checks = document.querySelectorAll('input:checked');
             const ids = Array.from(checks).map(c => c.value).join(',');
-            if(!ids) return alert("Choisis au moins une équipe !");
-            
+            if(!ids) return alert("Sélectionne au moins un club !");
             const link = window.location.origin + '/api/cal?teams=' + btoa(ids);
             document.getElementById('url').innerText = link;
             document.getElementById('result').classList.remove('hidden');
