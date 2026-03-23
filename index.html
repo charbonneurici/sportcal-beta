@@ -6,8 +6,7 @@
     <title>SportCal Rugby 🏉</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .grid-clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; }
-        /* Animation quand on coche */
+        .grid-clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
         input:checked + div { border-color: #f97316; background-color: rgba(249, 115, 22, 0.15); border-width: 3px; }
     </style>
 </head>
@@ -23,10 +22,9 @@
                 <button onclick="toggleAll()" class="text-[10px] font-black bg-slate-700 px-4 py-2 rounded-full hover:bg-slate-600 transition">Tout cocher</button>
             </div>
             
-            <div id="clubs-list" class="grid-clubs mb-10">
-                </div>
+            <div id="clubs-list" class="grid-clubs mb-10"></div>
 
-            <button onclick="generate()" class="w-full bg-orange-600 hover:bg-orange-500 py-5 rounded-2xl font-black text-xl transition-all shadow-xl shadow-orange-900/40 active:scale-95">
+            <button onclick="generate()" class="w-full bg-orange-600 hover:bg-orange-500 py-5 rounded-2xl font-black text-xl transition-all shadow-xl shadow-orange-900/40">
                 GÉNÉRER MON CALENDRIER
             </button>
         </div>
@@ -38,24 +36,21 @@
     </div>
 
     <script>
-        // Utilisation du proxy Google pour les images
-        const getLogo = (url) => `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(url)}`;
-
         const clubs = [
-            { id: "stade-toulousain", name: "Toulouse", logo: "https://www.lnr.fr/sites/default/files/stade_toulousain.png" },
-            { id: "stade-rochelais", name: "La Rochelle", logo: "https://www.lnr.fr/sites/default/files/stade_rochelais_0.png" },
-            { id: "ubb-bordeaux", name: "Bordeaux", logo: "https://www.lnr.fr/sites/default/files/ubb_0.png" },
-            { id: "rct-toulon", name: "Toulon", logo: "https://www.lnr.fr/sites/default/files/toulon.png" },
-            { id: "racing-92", name: "Racing 92", logo: "https://www.lnr.fr/sites/default/files/racing92.png" },
-            { id: "stade-francais", name: "Stade Français", logo: "https://www.lnr.fr/sites/default/files/stade_francais.png" },
-            { id: "asm-clermont", name: "Clermont", logo: "https://www.lnr.fr/sites/default/files/asm.png" },
-            { id: "lyon-lou", name: "Lyon LOU", logo: "https://www.lnr.fr/sites/default/files/lou_rugby.png" },
-            { id: "castres-olympique", name: "Castres", logo: "https://www.lnr.fr/sites/default/files/castres_olympique.png" },
-            { id: "pau-section", name: "Pau", logo: "https://www.lnr.fr/sites/default/files/section_paloise.png" },
-            { id: "bayonne", name: "Bayonne", logo: "https://www.lnr.fr/sites/default/files/bayonne.png" },
-            { id: "perpignan", name: "Perpignan", logo: "https://www.lnr.fr/sites/default/files/usap.png" },
-            { id: "montpellier", name: "Montpellier", logo: "https://www.lnr.fr/sites/default/files/mhr.png" },
-            { id: "montauban", name: "Montauban", logo: "https://www.lnr.fr/sites/default/files/montauban.png" }
+            { id: "stade-toulousain", name: "Toulouse", logo: "https://upload.wikimedia.org/wikipedia/fr/a/ab/Logo_Stade_Toulousain_2019.svg" },
+            { id: "stade-rochelais", name: "La Rochelle", logo: "https://upload.wikimedia.org/wikipedia/fr/9/9b/Logo_Stade_rochelais.svg" },
+            { id: "ubb-bordeaux", name: "Bordeaux", logo: "https://upload.wikimedia.org/wikipedia/fr/d/d4/Union_Bordeaux_B%C3%A8gles_%28logo_2023%29.svg" },
+            { id: "rct-toulon", name: "Toulon", logo: "https://upload.wikimedia.org/wikipedia/fr/5/52/Logo_du_RCT.png" },
+            { id: "racing-92", name: "Racing 92", logo: "https://upload.wikimedia.org/wikipedia/fr/6/62/Logo_Racing_92.svg" },
+            { id: "stade-francais", name: "Stade Français", logo: "https://upload.wikimedia.org/wikipedia/fr/3/30/Stade_fran%C3%A7ais_Paris_rugby_%28logo_2018%29.svg" },
+            { id: "asm-clermont", name: "Clermont", logo: "https://upload.wikimedia.org/wikipedia/fr/3/30/Logo_ASM_Clermont_Auvergne.svg" },
+            { id: "lyon-lou", name: "Lyon LOU", logo: "https://upload.wikimedia.org/wikipedia/fr/8/86/Logo_du_LOU_Rugby.svg" },
+            { id: "castres-olympique", name: "Castres", logo: "https://upload.wikimedia.org/wikipedia/fr/f/f7/Logo_Castres_Olympique_2016.svg" },
+            { id: "pau-section", name: "Pau", logo: "https://upload.wikimedia.org/wikipedia/fr/a/a2/Logo_Section_Paloise.png" },
+            { id: "bayonne", name: "Bayonne", logo: "https://upload.wikimedia.org/wikipedia/fr/e/eb/Logo_Aviron_Bayonnais_Rugby.svg" },
+            { id: "perpignan", name: "Perpignan", logo: "https://upload.wikimedia.org/wikipedia/fr/f/f5/Logo_USA_Perpignan.png" },
+            { id: "montpellier", name: "Montpellier", logo: "https://upload.wikimedia.org/wikipedia/fr/f/f7/Logo_MHR_%282021%29.svg" },
+            { id: "montauban", name: "Montauban", logo: "https://upload.wikimedia.org/wikipedia/fr/a/a3/Logo_US_Montauban_%282020%29.svg" }
         ];
 
         const list = document.getElementById('clubs-list');
@@ -65,7 +60,7 @@
             l.innerHTML = `
                 <input type="checkbox" value="${c.id}" class="hidden">
                 <div class="flex flex-col items-center p-4 bg-slate-700/20 rounded-2xl border-2 border-transparent transition-all">
-                    <img src="${getLogo(c.logo)}" alt="${c.name}" class="w-14 h-14 object-contain mb-3 pointer-events-none">
+                    <img src="${c.logo}" alt="${c.name}" class="w-14 h-14 object-contain mb-3">
                     <span class="text-[9px] font-black text-slate-400 group-hover:text-white">${c.name}</span>
                 </div>
             `;
