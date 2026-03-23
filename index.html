@@ -5,61 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SportCal Rugby 🏉</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .grid-clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
-    </style>
 </head>
 <body class="bg-slate-900 text-white p-6 flex flex-col items-center">
     <div class="max-w-4xl w-full text-center">
-        <h1 class="text-5xl font-black mb-6 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent italic">SPORTCAL RUGBY</h1>
+        <h1 class="text-5xl font-black mb-6 bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent italic">SPORTCAL RUGBY</h1>
         
         <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 shadow-2xl">
-            <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                <h2 class="text-2xl font-bold">Clubs Top 14</h2>
-                <button onclick="toggleAll()" class="text-xs bg-slate-700 px-4 py-2 rounded-full hover:bg-slate-600 transition">Tout sélectionner</button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold italic">TOP 14 LIVE</h2>
+                <button onclick="toggleAll()" class="text-[10px] uppercase font-bold bg-slate-700 px-4 py-2 rounded-full hover:bg-slate-600 transition">Tout cocher</button>
             </div>
             
-            <div id="clubs-list" class="grid-clubs mb-10"></div>
+            <div id="clubs-list" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-10"></div>
 
-            <button onclick="generate()" class="w-full bg-blue-600 hover:bg-blue-500 py-5 rounded-2xl font-black text-xl transition transform hover:scale-[1.01] shadow-xl shadow-blue-900/20 active:scale-95">
-                GÉNÉRER LE CALENDRIER (2H / MATCH)
+            <button onclick="generate()" class="w-full bg-orange-600 hover:bg-orange-500 py-5 rounded-2xl font-black text-xl transition shadow-xl shadow-orange-900/40 active:scale-95">
+                SYNCHRONISER MON AGENDA
             </button>
         </div>
 
-        <div id="result" class="hidden mt-8 p-6 bg-black rounded-3xl border border-blue-500/30 animate-pulse">
-            <p class="text-xs text-blue-400 mb-3 font-black uppercase tracking-widest">Lien prêt ! Copie-le :</p>
+        <div id="result" class="hidden mt-8 p-6 bg-black rounded-3xl border border-orange-500/30">
+            <p class="text-xs text-orange-400 mb-3 font-black">LIEN À COPIER DANS GOOGLE/APPLE CALENDAR :</p>
             <code id="url" class="text-blue-200 break-all text-sm block p-4 bg-slate-900 rounded-xl border border-slate-800"></code>
         </div>
     </div>
 
     <script>
-        // On utilise 'images.weserv.nl' comme proxy gratuit pour contourner le blocage
         const clubs = [
-            { id: "stade-toulousain", name: "Toulouse", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/xqpvwt1521564172.png" },
-            { id: "stade-rochelais", name: "La Rochelle", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/u86m7u1521564756.png" },
-            { id: "ubb-bordeaux", name: "Bordeaux-Bègles", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/vpxrvr1521564537.png" },
-            { id: "rct-toulon", name: "Toulon", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/6t29771521564478.png" },
-            { id: "racing-92", name: "Racing 92", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/uwpvst1521564506.png" },
-            { id: "stade-francais", name: "Stade Français", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/8s9npt1551608931.png" },
-            { id: "asm-clermont", name: "Clermont", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/syvrtx1521564344.png" },
-            { id: "lyon-lou", name: "Lyon", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/rwstqt1521564379.png" },
-            { id: "castres-olympique", name: "Castres", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/9v64h41521564619.png" },
-            { id: "pau-section", name: "Pau", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/6998631521564593.png" },
-            { id: "bayonne", name: "Bayonne", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/9m29531521564887.png" },
-            { id: "perpignan", name: "Perpignan", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/6335191533470768.png" },
-            { id: "montpellier", name: "Montpellier", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/2529261551608670.png" },
-            { id: "montauban", name: "Montauban", logo: "https://images.weserv.nl/?url=https://www.thesportsdb.com/images/media/team/badge/vsqxtv1521565551.png" }
+            { id: "stade-toulousain", name: "Toulouse", logo: "https://www.thesportsdb.com/images/media/team/badge/xqpvwt1521564172.png" },
+            { id: "stade-rochelais", name: "La Rochelle", logo: "https://www.thesportsdb.com/images/media/team/badge/u86m7u1521564756.png" },
+            { id: "ubb-bordeaux", name: "Bordeaux", logo: "https://www.thesportsdb.com/images/media/team/badge/vpxrvr1521564537.png" },
+            { id: "rct-toulon", name: "Toulon", logo: "https://www.thesportsdb.com/images/media/team/badge/6t29771521564478.png" },
+            { id: "racing-92", name: "Racing 92", logo: "https://www.thesportsdb.com/images/media/team/badge/uwpvst1521564506.png" },
+            { id: "stade-francais", name: "Stade Français", logo: "https://www.thesportsdb.com/images/media/team/badge/8s9npt1551608931.png" },
+            { id: "asm-clermont", name: "Clermont", logo: "https://www.thesportsdb.com/images/media/team/badge/syvrtx1521564344.png" },
+            { id: "lyon-lou", name: "Lyon", logo: "https://www.thesportsdb.com/images/media/team/badge/rwstqt1521564379.png" },
+            { id: "castres-olympique", name: "Castres", logo: "https://www.thesportsdb.com/images/media/team/badge/9v64h41521564619.png" },
+            { id: "pau-section", name: "Pau", logo: "https://www.thesportsdb.com/images/media/team/badge/6998631521564593.png" },
+            { id: "bayonne", name: "Bayonne", logo: "https://www.thesportsdb.com/images/media/team/badge/9m29531521564887.png" },
+            { id: "perpignan", name: "Perpignan", logo: "https://www.thesportsdb.com/images/media/team/badge/6335191533470768.png" },
+            { id: "montpellier", name: "Montpellier", logo: "https://www.thesportsdb.com/images/media/team/badge/2529261551608670.png" },
+            { id: "montauban", name: "Montauban", logo: "https://www.thesportsdb.com/images/media/team/badge/vsqxtv1521565551.png" }
         ];
 
         const list = document.getElementById('clubs-list');
         clubs.forEach(c => {
             const l = document.createElement('label');
-            l.className = "flex flex-col items-center p-4 bg-slate-700/20 rounded-2xl cursor-pointer hover:bg-slate-700 transition-all border-2 border-transparent has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10";
-            l.innerHTML = `
-                <input type="checkbox" value="${c.id}" class="hidden">
-                <img src="${c.logo}" alt="${c.name}" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                <span class="text-[10px] font-black uppercase text-center text-slate-300">${c.name}</span>
-            `;
+            l.className = "flex flex-col items-center p-3 bg-slate-700/20 rounded-2xl cursor-pointer hover:bg-slate-700/50 border-2 border-transparent has-[:checked]:border-orange-500 transition-all";
+            // Proxy d'image robuste : wsrv.nl
+            const proxyLogo = `https://wsrv.nl/?url=${encodeURIComponent(c.logo)}&w=100&h=100`;
+            l.innerHTML = `<input type="checkbox" value="${c.id}" class="hidden"><img src="${proxyLogo}" class="w-12 h-12 mb-2 object-contain"><span class="text-[9px] font-black uppercase text-center">${c.name}</span>`;
             list.appendChild(l);
         });
 
@@ -70,12 +64,9 @@
         }
 
         function generate() {
-            const checks = document.querySelectorAll('input:checked');
-            const ids = Array.from(checks).map(c => c.value).join(',');
+            const ids = Array.from(document.querySelectorAll('input:checked')).map(c => c.value).join(',');
             if(!ids) return alert("Choisis au moins un club !");
-            
-            const link = window.location.origin + '/api/cal?teams=' + btoa(ids);
-            document.getElementById('url').innerText = link;
+            document.getElementById('url').innerText = window.location.origin + '/api/cal?teams=' + btoa(ids);
             document.getElementById('result').classList.remove('hidden');
         }
     </script>
