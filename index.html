@@ -5,77 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SportCal Rugby 🏉</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .grid-clubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
-        input:checked + div { border-color: #f97316; background-color: rgba(249, 115, 22, 0.15); border-width: 3px; }
-    </style>
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center p-6 uppercase">
     
     <div class="max-w-4xl w-full text-center">
         <h1 class="text-5xl font-black mb-2 italic tracking-tighter">SportCal Rugby</h1>
-        <p class="text-slate-500 mb-10 text-sm font-bold tracking-[0.5em]">TOP 14 • EDITION 2026</p>
+        <p class="text-slate-500 mb-10 text-sm font-bold tracking-[0.5em]">TEST LOGOS INTERNES</p>
 
         <div class="bg-slate-800 p-8 rounded-[2rem] shadow-2xl border border-slate-700">
-            <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
-                <h2 class="text-lg font-bold text-slate-400 italic">Sélection :</h2>
-                <button onclick="toggleAll()" class="text-[10px] font-black bg-slate-700 px-4 py-2 rounded-full hover:bg-slate-600 transition">Tout cocher</button>
+            <div id="clubs-list" class="grid grid-cols-2 gap-4 mb-10">
+                <label class="cursor-pointer group">
+                    <input type="checkbox" value="stade-toulousain" class="hidden">
+                    <div class="flex flex-col items-center p-4 bg-slate-700/20 rounded-2xl border-2 border-transparent transition-all hover:bg-slate-700/50">
+                        <img src="https://api.dicebear.com/7.x/identicon/svg?seed=toulouse" class="w-16 h-16 mb-2">
+                        <span class="text-xs font-black">TOULOUSE</span>
+                    </div>
+                </label>
+
+                <label class="cursor-pointer group">
+                    <input type="checkbox" value="stade-rochelais" class="hidden">
+                    <div class="flex flex-col items-center p-4 bg-slate-700/20 rounded-2xl border-2 border-transparent transition-all hover:bg-slate-700/50">
+                        <img src="https://api.dicebear.com/7.x/identicon/svg?seed=larochelle" class="w-16 h-16 mb-2">
+                        <span class="text-xs font-black">LA ROCHELLE</span>
+                    </div>
+                </label>
             </div>
-            
-            <div id="clubs-list" class="grid-clubs mb-10"></div>
 
-            <button onclick="generate()" class="w-full bg-orange-600 hover:bg-orange-500 py-5 rounded-2xl font-black text-xl transition-all shadow-xl shadow-orange-900/40">
-                GÉNÉRER MON CALENDRIER
-            </button>
+            <button onclick="generate()" class="w-full bg-orange-600 py-5 rounded-2xl font-black">GÉNÉRER</button>
         </div>
-
-        <div id="result" class="hidden mt-8 p-6 bg-slate-950 rounded-[2rem] border border-orange-500/30">
-            <p class="text-[10px] text-orange-400 mb-3 font-black tracking-widest">LIEN DE SYNCHRO PRÊT :</p>
-            <code id="url" class="text-blue-300 break-all text-xs block p-4 bg-slate-900 rounded-xl border border-slate-800 mb-2 lowercase font-mono"></code>
+        
+        <div id="result" class="hidden mt-8 p-6 bg-slate-950 rounded-2xl border border-orange-500/30">
+            <code id="url" class="text-blue-300 break-all text-xs block p-4 bg-slate-900 rounded-xl lowercase"></code>
         </div>
     </div>
 
     <script>
-        const clubs = [
-            { id: "stade-toulousain", name: "Toulouse", logo: "https://upload.wikimedia.org/wikipedia/fr/a/ab/Logo_Stade_Toulousain_2019.svg" },
-            { id: "stade-rochelais", name: "La Rochelle", logo: "https://upload.wikimedia.org/wikipedia/fr/9/9b/Logo_Stade_rochelais.svg" },
-            { id: "ubb-bordeaux", name: "Bordeaux", logo: "https://upload.wikimedia.org/wikipedia/fr/d/d4/Union_Bordeaux_B%C3%A8gles_%28logo_2023%29.svg" },
-            { id: "rct-toulon", name: "Toulon", logo: "https://upload.wikimedia.org/wikipedia/fr/5/52/Logo_du_RCT.png" },
-            { id: "racing-92", name: "Racing 92", logo: "https://upload.wikimedia.org/wikipedia/fr/6/62/Logo_Racing_92.svg" },
-            { id: "stade-francais", name: "Stade Français", logo: "https://upload.wikimedia.org/wikipedia/fr/3/30/Stade_fran%C3%A7ais_Paris_rugby_%28logo_2018%29.svg" },
-            { id: "asm-clermont", name: "Clermont", logo: "https://upload.wikimedia.org/wikipedia/fr/3/30/Logo_ASM_Clermont_Auvergne.svg" },
-            { id: "lyon-lou", name: "Lyon LOU", logo: "https://upload.wikimedia.org/wikipedia/fr/8/86/Logo_du_LOU_Rugby.svg" },
-            { id: "castres-olympique", name: "Castres", logo: "https://upload.wikimedia.org/wikipedia/fr/f/f7/Logo_Castres_Olympique_2016.svg" },
-            { id: "pau-section", name: "Pau", logo: "https://upload.wikimedia.org/wikipedia/fr/a/a2/Logo_Section_Paloise.png" },
-            { id: "bayonne", name: "Bayonne", logo: "https://upload.wikimedia.org/wikipedia/fr/e/eb/Logo_Aviron_Bayonnais_Rugby.svg" },
-            { id: "perpignan", name: "Perpignan", logo: "https://upload.wikimedia.org/wikipedia/fr/f/f5/Logo_USA_Perpignan.png" },
-            { id: "montpellier", name: "Montpellier", logo: "https://upload.wikimedia.org/wikipedia/fr/f/f7/Logo_MHR_%282021%29.svg" },
-            { id: "montauban", name: "Montauban", logo: "https://upload.wikimedia.org/wikipedia/fr/a/a3/Logo_US_Montauban_%282020%29.svg" }
-        ];
-
-        const list = document.getElementById('clubs-list');
-        clubs.forEach(c => {
-            const l = document.createElement('label');
-            l.className = "cursor-pointer group";
-            l.innerHTML = `
-                <input type="checkbox" value="${c.id}" class="hidden">
-                <div class="flex flex-col items-center p-4 bg-slate-700/20 rounded-2xl border-2 border-transparent transition-all">
-                    <img src="${c.logo}" alt="${c.name}" class="w-14 h-14 object-contain mb-3">
-                    <span class="text-[9px] font-black text-slate-400 group-hover:text-white">${c.name}</span>
-                </div>
-            `;
-            list.appendChild(l);
-        });
-
-        function toggleAll() {
-            const checks = document.querySelectorAll('input[type="checkbox"]');
-            const allChecked = Array.from(checks).every(c => c.checked);
-            checks.forEach(c => c.checked = !allChecked);
-        }
-
         function generate() {
             const ids = Array.from(document.querySelectorAll('input:checked')).map(c => c.value).join(',');
-            if(!ids) return alert("Choisis un club !");
             document.getElementById('url').innerText = window.location.origin + '/api/cal?teams=' + btoa(ids);
             document.getElementById('result').classList.remove('hidden');
         }
